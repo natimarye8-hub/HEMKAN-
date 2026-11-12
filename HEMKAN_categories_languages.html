@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090909">
+<title>HEMKAN</title>
+<style>
+:root{--red:#e50914;--bg:#090909;--panel:#171717;--muted:#aaa}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#fff;font-family:Arial,Helvetica,sans-serif}
+header{background:#111;border-bottom:2px solid var(--red);padding:18px 16px;position:sticky;top:0;z-index:5}
+.brand{font-size:27px;font-weight:900;letter-spacing:2px;color:var(--red)}
+.sub{color:#bbb;font-size:12px;margin-top:4px}
+main{max-width:1050px;margin:auto;padding:18px 14px 40px}
+h2{font-size:19px;margin:22px 0 12px}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input,select{width:100%;padding:12px;border-radius:8px;border:1px solid #444;background:#171717;color:#fff;font-size:14px}
+.search{grid-column:1/-1}
+nav{display:flex;gap:8px;overflow:auto;padding:14px 0 4px}
+nav button,.chip{border:1px solid #444;background:#171717;color:#eee;padding:9px 13px;border-radius:20px;white-space:nowrap}
+nav button.active,.chip.active{background:var(--red);border-color:var(--red);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.movie{background:var(--panel);border-radius:10px;overflow:hidden;border:1px solid #292929}
+.poster{width:100%;height:205px;object-fit:cover;background:#222;display:block}
+.info{padding:10px}
+.name{font-weight:700;font-size:15px;margin-bottom:7px}
+.meta{font-size:12px;color:var(--muted);line-height:1.6}
+.tag{display:inline-block;background:#292929;color:#eee;padding:3px 7px;border-radius:5px;margin:5px 4px 0 0;font-size:11px}
+.empty{color:#bbb;text-align:center;padding:30px 10px;grid-column:1/-1}
+footer{text-align:center;color:#777;font-size:12px;padding:28px 10px}
+@media(min-width:650px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.poster{height:260px}.controls{grid-template-columns:2fr 1fr 1fr}.search{grid-column:auto}}
+</style>
+</head>
+<body>
+<header><div class="brand">HEMKAN</div><div class="sub">Find movies by category and language</div></header>
+<main>
+  <nav aria-label="Main navigation">
+    <button class="active" data-page="home">Home</button>
+    <button data-page="latest">Latest Movies</button>
+    <button data-page="favorites">Favorites</button>
+  </nav>
+  <h2>Search & Filter</h2>
+  <div class="controls">
+    <input class="search" id="search" placeholder="Search movie title..." aria-label="Search movie title">
+    <select id="category" aria-label="Choose category">
+      <option value="">All Categories</option>
+      <option>Action</option><option>Comedy</option><option>Drama</option><option>Horror</option>
+      <option>Romance</option><option>Thriller</option><option>Adventure</option>
+      <option>Sci-Fi</option><option>Animation</option><option>Documentary</option>
+    </select>
+    <select id="language" aria-label="Choose language">
+      <option value="">All Languages</option>
+      <option>Amharic</option><option>English</option><option>Korean</option><option>Japanese</option>
+      <option>Chinese</option><option>Hindi</option><option>Turkish</option><option>Other Languages</option>
+    </select>
+  </div>
+  <h2 id="sectionTitle">Movies</h2>
+  <section class="grid" id="movies"></section>
+  <footer>HEMKAN · Demo version</footer>
+</main>
+<script>
+const demoMovies = [
+ {title:"Sample Action Movie",category:"Action",language:"English",year:"2026",image:"https://placehold.co/600x900/191919/e50914?text=Action"},
+ {title:"Sample Comedy Movie",category:"Comedy",language:"Amharic",year:"2026",image:"https://placehold.co/600x900/191919/ffffff?text=Comedy"},
+ {title:"Sample Drama Movie",category:"Drama",language:"Korean",year:"2025",image:"https://placehold.co/600x900/191919/e50914?text=Drama"},
+ {title:"Sample Adventure Movie",category:"Adventure",language:"Hindi",year:"2025",image:"https://placehold.co/600x900/191919/ffffff?text=Adventure"},
+ {title:"Sample Animation",category:"Animation",language:"Japanese",year:"2025",image:"https://placehold.co/600x900/191919/e50914?text=Animation"},
+ {title:"Sample Thriller",category:"Thriller",language:"Turkish",year:"2024",image:"https://placehold.co/600x900/191919/ffffff?text=Thriller"},
+ {title:"Sample Documentary",category:"Documentary",language:"Chinese",year:"2024",image:"https://placehold.co/600x900/191919/e50914?text=Documentary"},
+ {title:"Sample Sci-Fi Movie",category:"Sci-Fi",language:"Other Languages",year:"2024",image:"https://placehold.co/600x900/191919/ffffff?text=Sci-Fi"}
+];
+let page="home";
+const search=document.getElementById("search"), category=document.getElementById("category"), language=document.getElementById("language");
+const movies=document.getElementById("movies"), title=document.getElementById("sectionTitle");
+function render(){
+ const q=search.value.trim().toLowerCase();
+ let list=demoMovies.filter(m=>(!q||m.title.toLowerCase().includes(q))&&(!category.value||m.category===category.value)&&(!language.value||m.language===language.value));
+ if(page==="latest") list=list.filter(m=>Number(m.year)>=2025);
+ if(page==="favorites") list=[];
+ title.textContent=page==="latest"?"Latest Movies":page==="favorites"?"Favorites":"Movies";
+ movies.innerHTML=list.length?list.map(m=>`<article class="movie"><img class="poster" src="${m.image}" alt="${m.title} poster"><div class="info"><div class="name">${m.title}</div><div class="meta">${m.year}</div><span class="tag">${m.category}</span><span class="tag">${m.language}</span></div></article>`).join(""):`<div class="empty">${page==="favorites"?"Your favorites will appear here.":"No movies match these filters."}</div>`;
+}
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");page=b.dataset.page;render()}));
+[search,category,language].forEach(el=>el.addEventListener("input",render));
+render();
+</script>
+</body>
+</html>
