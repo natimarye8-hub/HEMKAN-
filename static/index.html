@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090909"><title>HEMKAN</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#090909;color:#fff;font-family:Arial,sans-serif}
+header{padding:18px;background:#111;border-bottom:2px solid #e50914;position:sticky;top:0}
+.brand{font-size:28px;font-weight:900;letter-spacing:2px;color:#e50914}
+main{max-width:1050px;margin:auto;padding:18px 14px}
+h2{font-size:19px;margin:22px 0 12px}.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input,select{width:100%;padding:12px;border:1px solid #444;border-radius:8px;background:#171717;color:white}
+.search{grid-column:1/-1}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.card{background:#171717;border:1px solid #292929;border-radius:10px;overflow:hidden}
+.poster{width:100%;height:210px;object-fit:cover;background:#222}.info{padding:10px}
+.name{font-weight:bold;margin-bottom:7px}.desc{color:#bbb;font-size:13px;white-space:pre-wrap;overflow-wrap:anywhere}
+.tag{display:inline-block;background:#292929;border-radius:5px;padding:4px 7px;font-size:11px;margin:6px 5px 0 0}
+a{color:#ff666d}.empty{grid-column:1/-1;text-align:center;color:#aaa;padding:30px}
+@media(min-width:650px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.poster{height:260px}.filters{grid-template-columns:2fr 1fr 1fr}.search{grid-column:auto}}
+</style></head>
+<body><header><div class="brand">HEMKAN</div></header>
+<main><h2>Search & Filter</h2>
+<div class="filters">
+<input class="search" id="search" placeholder="Search movie title...">
+<select id="category"><option value="">All Categories</option><option>Action</option><option>Comedy</option><option>Drama</option><option>Horror</option><option>Thriller</option><option>Adventure</option><option>Sci-Fi</option><option>Animation</option><option>Documentary</option></select>
+<select id="language"><option value="">All Languages</option><option>Amharic</option><option>English</option><option>Korean</option><option>Japanese</option><option>Chinese</option><option>Hindi</option><option>Turkish</option><option>Other Languages</option></select>
+</div><h2>Telegram Channel Posts</h2><section id="movies" class="grid"><div class="empty">Loading posts…</div></section></main>
+<script>
+let data=[];
+const el=id=>document.getElementById(id);
+function render(){
+ const q=el('search').value.toLowerCase(), cat=el('category').value, lang=el('language').value;
+ const list=data.filter(m=>(!q||m.title.toLowerCase().includes(q)||m.description.toLowerCase().includes(q)));
+ el('movies').innerHTML=list.length?list.map(m=>`<article class="card">${m.image?`<img class="poster" src="${m.image}" alt="">`:''}<div class="info"><div class="name">${escapeHtml(m.title)}</div><div class="desc">${escapeHtml(m.description)}</div>${m.url?`<p><a href="${m.url}" target="_blank" rel="noopener">Open Telegram post</a></p>`:''}</div></article>`).join(''):'<div class="empty">No Telegram posts received yet.</div>';
+}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function load(){try{const r=await fetch('/api/movies');data=await r.json();render()}catch(e){el('movies').innerHTML='<div class="empty">Could not load posts. Check server setup.</div>'}}
+['search','category','language'].forEach(id=>el(id).addEventListener('input',render));
+load();setInterval(load,30000);
+</script></body></html>
